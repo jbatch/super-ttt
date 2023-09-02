@@ -28,7 +28,7 @@ function validMove(move: Move, lastMove: Move | undefined, board: Board[]) {
   }
 
   if (move[0] !== lastMove[1]) {
-    console.log('Move must be in bobard: ', lastMove[1]);
+    console.log('Move must be in board: ', lastMove[1]);
     return false;
   }
   return true;
@@ -81,6 +81,12 @@ function App() {
   const [currPlayer, setCurrPlayer] = useState<Player>(1);
   const [lastMove, setLastMove] = useState<Move | undefined>(undefined);
   const [gameOver, setGameOver] = useState(false);
+
+  // If the last move played corresponds to a valid board to play on that board MUST be played on
+  const forcedBoard =
+    lastMove !== undefined && getWinnerForBoard(boards[lastMove[1]]) === 0
+      ? lastMove[1]
+      : undefined;
 
   // const log = () => {
   //   console.log(JSON.stringify(boards));
@@ -151,7 +157,7 @@ function App() {
   return (
     <div className='flex flex-col items-center justify-center'>
       <p className='text-2xl'>Super Tic Tac Toe</p>
-      <div className='p-4 w-full lg:w-1/2 grid grid-cols-3 grid-rows-3 aspect-square'>
+      <div className='p-4 w-full lg:w-1/2 grid grid-cols-3 grid-rows-3 gap-1 aspect-square'>
         {boards.map((innerBoard, outer) => {
           const winner = getWinnerForBoard(boards[outer]);
           return (
@@ -159,7 +165,8 @@ function App() {
               key={`o${outer}`}
               className={cn(
                 'border-solid border-2 border-slate-500 p-1 grid grid-cols-3 grid-rows-3 aspect-square',
-                outerBoardClass(winner)
+                outerBoardClass(winner),
+                forcedBoard === outer ? 'border-green-400' : ''
               )}
             >
               {innerBoard.map((a, inner) => {
