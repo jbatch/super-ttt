@@ -80,6 +80,7 @@ function App() {
   const [boards, setBoards] = useState<Board[]>(EMPTY_BOARD);
   const [currPlayer, setCurrPlayer] = useState<Player>(1);
   const [lastMove, setLastMove] = useState<Move | undefined>(undefined);
+  const [status, setStatus] = useState('Player 1 turn');
   const [gameOver, setGameOver] = useState(false);
 
   // If the last move played corresponds to a valid board to play on that board MUST be played on
@@ -103,13 +104,16 @@ function App() {
     const updatedBoards = JSON.parse(JSON.stringify(boards)) as Board[];
     updatedBoards[move[0]][move[1]] = currPlayer;
     setBoards(updatedBoards);
-    setCurrPlayer((v) => (v === 1 ? 2 : 1));
+    const newCurrPlayer = currPlayer === 1 ? 2 : 1;
+    setCurrPlayer(newCurrPlayer);
+    setStatus('Player ' + newCurrPlayer + ' turn');
     setLastMove(move);
 
     const outerBoard = updatedBoards.map((_, i) => getWinner(updatedBoards, i));
     const winner = getWinnerForBoard(outerBoard);
     if (winner !== 0) {
       setGameOver(true);
+      setStatus('Player ' + winner + ' wins!');
       console.log('winner: ', winner);
     }
   };
@@ -118,6 +122,7 @@ function App() {
     setBoards(EMPTY_BOARD);
     setCurrPlayer(1);
     setLastMove(undefined);
+    setStatus('Player 1 turn');
     setGameOver(false);
   };
   const bgColorForPlayer = (player: number) => {
@@ -157,7 +162,7 @@ function App() {
   return (
     <div className='flex flex-col items-center justify-center'>
       <p className='text-2xl'>Super Tic Tac Toe</p>
-      <div className='p-4 w-full lg:w-1/2 grid grid-cols-3 grid-rows-3 gap-1 aspect-square'>
+      <div className='p-4 w-full lg:w-1/2 max-w-lg grid grid-cols-3 grid-rows-3 gap-1 aspect-square'>
         {boards.map((innerBoard, outer) => {
           const winner = getWinnerForBoard(boards[outer]);
           return (
@@ -166,7 +171,7 @@ function App() {
               className={cn(
                 'border-solid border-2 border-slate-500 p-1 grid grid-cols-3 grid-rows-3 aspect-square',
                 outerBoardClass(winner),
-                forcedBoard === outer ? 'border-green-400' : ''
+                forcedBoard === outer && !gameOver ? 'border-green-400' : ''
               )}
             >
               {innerBoard.map((a, inner) => {
@@ -187,7 +192,8 @@ function App() {
           );
         })}
       </div>
-      <button className='w-full md:w-1/2' onClick={() => reset()}>
+      <p className='text-lg mb-2'>{status}</p>
+      <button className='w-full lg:w-1/2 max-w-lg' onClick={() => reset()}>
         Reset
       </button>
     </div>
